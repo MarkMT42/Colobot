@@ -8,4 +8,5 @@ https://en.wikipedia.org/wiki/Colobot
 https://colobot.fandom.com/wiki/Colobot
 
 The CBOT language is very close in structure and syntax to C++ and Java.
+
 https://colobot.fandom.com/wiki/CBOT_Language
