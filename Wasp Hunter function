@@ -1,0 +1,64 @@
+extern void object::WaspH4()
+{
+	object target;
+	object targets[];
+	float posT1x, posT1y, posT1z, posT2x, posT2y, posT2z, posT3x, posT3y, posT3z;
+	point targetFuturePos;
+	int vectorMultiplier = 10;
+	float vectorTime = 0.1;
+	float angle;
+	targets = radarall(AlienWasp);
+	while (targets !=null)
+	{
+		target = radar(AlienWasp);
+		if (position.z < target.position.z)
+		{
+			jet(0.3);
+		}
+		if (position.z > target.position.z)
+		{
+			jet(-0.3);
+		}
+		target = radar(AlienWasp);
+		posT1x = target.position.x;
+		posT1y = target.position.y;
+		posT1z = target.position.z;
+		wait(vectorTime);
+		posT2x = target.position.x;
+		posT2y = target.position.y;
+		posT2z = target.position.z;
+		posT3x = vectorMultiplier * (posT2x - posT1x) + posT2x;
+		posT3y = vectorMultiplier * (posT2y - posT1y) + posT2y;
+		posT3z = vectorMultiplier * (posT2z - posT1z) + posT2z;
+		targetFuturePos.x = posT3x;
+		targetFuturePos.y = posT3y;
+		targetFuturePos.z = posT3z;
+		angle = direction(targetFuturePos);
+		if (distance(position,target.position) <= 5)
+		{
+			if (angle < 0)
+			{
+				motor(-1, -1+angle/90);
+			}
+			else if (angle > 0)
+			{
+				motor(-1-angle/90, -1);
+			}
+		}
+		else if (angle < 0)
+		{
+			motor(1, 1+angle/90);
+		}
+		else if (angle > 0)
+		{
+			motor(1-angle/90, 1);
+		}
+		// motor(1, 1);
+		if (radar(AlienWasp, 0, 10, 0, 30) != null)
+		{
+			fire(0.2);
+			message(this.energyCell.energyLevel);
+		}
+	}
+	message(this.energyCell.energyLevel);
+}
