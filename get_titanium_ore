@@ -1,0 +1,143 @@
+void object::BatteryLow()
+{
+	object ship, eCell, pStation;
+	object[] eCells;
+	pStation = radar(PowerStation);
+	if (pStation == null) // if no PowerStation, find the most charged PowerCell
+	{
+		eCells = radarall(PowerCell);
+		int i = 0;
+		float chargedLevel = 1;
+		// while (i < sizeof(eCells));
+		while (eCells[i].energyLevel < chargedLevel)
+		{
+			i++;
+			if (i == sizeof(eCells) - 1)
+			{
+				chargedLevel =- 0.1; // 0.4; 0.7;
+				i = 0;
+			}
+			else if (chargedLevel < 0.2)
+			{
+				message("No suitably charged PowerCell found, Stopping Program");
+			}
+			else
+			{
+				//
+			}
+		}
+		eCell = eCells[i];
+		message("Bot " + this.id + " energy level is " + this.energyCell.energyLevel + " getting nearest Cell");
+		goto(eCell.position);
+		grab(EnergyCell);
+		drop(Behind);
+		grab();
+		drop(EnergyCell);
+		message("Bot " + this.id + " has changed it's Cell and it's energy level is " + this.energyCell.energyLevel*100 + "%");
+	}
+	else // going to PowerStation to Charge
+	{
+		message("Bot " + this.id + " energy level is " + this.energyCell.energyLevel * 100+ "% going to nearest PowerStation to charge");
+		goto(pStation.position);
+		while (this.energyCell.energyLevel != 1)
+		{
+			wait(0.1);
+		}
+	}
+}
+
+void object::DepositToShip()
+{
+	object item, ship;
+}
+
+extern void object::GetTitOres06()
+{
+	errmode(0);
+	message("Current energy level is: " + this.energyCell.energyLevel*100 + "%");
+	object titO, ship, eCell, pStation;
+	object[] titOs;
+	object[] eCells;
+	float radi = 20;
+	int numTitO= 0;
+	// float titODir, sShipDir;
+	ship = radar(SpaceShip);
+	if (this.load != null)
+	{
+		if (this.position.z > 0)
+		{
+			turn(direction(ship.position));
+			move(distance(position, ship.position)- 2.5);
+		}
+		else
+		{
+			drop();
+		}
+	}
+	if (distance(this.position, ship.position) < 20)
+	{
+		titO = radar(TitaniumOre, 0, 360, radi);
+		// titOs = radarall(TitaniumOre, direction(sShip.position), 90, 0, 40);
+		titOs = radarall(TitaniumOre, 0, 360, 0, radi+5);
+		numTitO = sizeof(titOs);
+		message("In total there are " + numTitO + " Titanium Ore in the SpaceShip");
+	}
+	else
+	{
+		titO = radar(TitaniumOre);
+		if (radar(SpaceShip, direction(titO.position), radi) != null)
+		{
+			titO = radar(TitaniumOre, direction(ship.position)-180, 360-(asin(radi/distance(position, ship.position))*2));
+			// the closer it is to the SpaceShip the smaller the angle to search, so not to find the ones on the ship
+		}
+	}
+	while (this.energyCell.energyLevel > 0.01)
+	{
+		if (this.energyCell.energyLevel > 0.15) // go fetch Titanium Ore
+		{
+			message("Bot " + this.id + " is on the way to get Titanium Ore");
+			goto(titO.position);
+			grab();
+			/*
+			while (grab() != 0)
+			{
+				wait(1);
+				goto(titO.position);
+				grab();
+			}
+			*/
+			// goto(space(sShip.position, 2, 5, 1)); space in SpaceShip INOP
+			goto(ship.position);
+			//move(-0.5);
+			//turn(-30 * numTitO);
+			//move(0.5);
+			while (drop() != 0)
+			{
+				turn(-1);
+				if (this.load != null) drop();
+				if (this.load == null) break;
+			}
+			// numTitO ++;
+			// goto(space(sShip.position, 20, 25, 1));
+			message("Bot " + this.id + " has delivered another Titanium Ore to the SpaceShip");
+			titO = radar(TitaniumOre, 0, 360, radi);
+			// titOs = radarall(TitaniumOre, direction(sShip.position), 360, 0, 20);
+			titOs = radarall(TitaniumOre, 0, 360, 0, radi);
+			numTitO = sizeof(titOs);
+			message("In total there are " + numTitO + " Titanium Ore in the SpaceShip");
+			if (titO == null)
+			{
+				message("No more Titanium Ores found in the nearby area");
+				break;
+			}
+		}
+		else
+		{
+			BatteryLow();
+		}
+	}
+	jet(-0.5);
+	wait(5);
+	jet(0);
+	message("Bot " + this.id + " has ran out of power, awaiting Cell change");
+}
